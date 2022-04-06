@@ -4,19 +4,19 @@ import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 
-class InMemorySpanExporter : SpanExporter {
+class InMemorySpanExporter(private val decorated: SpanExporter? = null) : SpanExporter {
     val allSpans = ArrayList<SpanData>()
     override fun export(spans: MutableCollection<SpanData>): CompletableResultCode {
         allSpans.addAll(spans)
-        return CompletableResultCode.ofSuccess()
+        return if (decorated == null) CompletableResultCode.ofSuccess() else decorated.export(spans)
     }
 
     override fun flush(): CompletableResultCode {
         allSpans.clear()
-        return CompletableResultCode.ofSuccess()
+        return if (decorated == null) CompletableResultCode.ofSuccess() else decorated.flush()
     }
 
     override fun shutdown(): CompletableResultCode {
-        return CompletableResultCode.ofSuccess()
+        return if (decorated == null) CompletableResultCode.ofSuccess() else decorated.shutdown()
     }
 }
