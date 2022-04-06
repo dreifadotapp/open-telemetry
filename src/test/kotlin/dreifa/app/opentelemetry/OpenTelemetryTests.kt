@@ -1,5 +1,6 @@
 package dreifa.app.opentelemetry
 
+import dreifa.app.opentelemetry.presenters.TimelinePresenter
 import dreifa.app.registry.Registry
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanKind
@@ -21,6 +22,8 @@ class OpenTelemetryTests
 //        val x = ByteArrayOutputStream()
 //        System.setErr(PrintStream( x))
 
+
+        provider.provider().getTracer("fgdhsjsd").spanBuilder("Client").setSpanKind(SpanKind.CLIENT).startSpan().end()
 
         var tracer: Tracer = provider.provider().getTracer("dreifa.app.tasks.Tracer")
 
@@ -49,6 +52,11 @@ class OpenTelemetryTests
             println(it.kind)
 
         }
+
+        val presenter = TimelinePresenter()
+        println(presenter.present( provider.spans()))
+
+
     }
 
 }
