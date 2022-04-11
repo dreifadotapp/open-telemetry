@@ -1,25 +1,40 @@
 package dreifa.app.opentelemetry
 
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
 import dreifa.app.opentelemetry.presenters.TimelinePresenter
-import dreifa.app.registry.Registry
-import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.api.trace.Tracer
 import io.opentelemetry.context.Context
-import io.opentelemetry.sdk.resources.Resource
-import io.opentelemetry.sdk.trace.SdkTracerProvider
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import java.util.*
 
-class OpenTelemetryTests
-{
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class OpenTelemetryTests {
     //private val registry = Registry()
-    private val provider = ZipKinOpenTelemetryProvider()
+    private lateinit var provider: ZipKinOpenTelemetryProvider
 
     init {
         //registry.store(taskFactory).store(logChannelFactory)
     }
+
+    @BeforeEach
+    fun `fresh provider`() {
+        provider = ZipKinOpenTelemetryProvider()
+    }
+
+    @AfterAll
+    fun `wait for zipkin 2`() {
+        // give it time to flush to zipkin
+        Thread.sleep(50)
+    }
+
 
     @Test
     fun `should log something!`() {
@@ -29,16 +44,47 @@ class OpenTelemetryTests
 
         var tracer: Tracer = provider.provider().getTracer("dreifa.app.tasks.Tracer")
 
-        val outerSpan: Span = tracer.spanBuilder("Client").setSpanKind(SpanKind.CLIENT).setAttribute("wibble.name","foobar").startSpan()
+        val propogator = provider.provider().propagators.textMapPropagator
+        println(propogator)
+
+
+        val outerSpan: Span = tracer.spanBuilder("Client")
+            .setSpanKind(SpanKind.CLIENT)
+            //.setParent(Context.current().with(ImplicitContextKeyed {  }))
+            .startSpan()
+
+
+        val y = Y()
+        val carrier = Carrier("000086bcaa3febcb0129ac0d6322edff", outerSpan.spanContext.spanId)
+
+
+        val extractedContext: Context = propogator
+            .extract(Context.current(), carrier, y)
+
+        //val extracted =  extractedContext.makeCurrent()
+        val current = Context.current()
+        val currentWithSpan = Context.current().with(outerSpan)
+        //println(extracted)
+
+        try {
+            outerSpan.makeCurrent()
+            outerSpan.setAttribute(SemanticAttributes.HTTP_METHOD, "GET")
+            propogator.inject(Context.current()/*.with(outerSpan)*/, carrier, X())
+
+
+        } catch (e: Exception) {
+
+        }
 
         val taskSpan: Span = tracer.spanBuilder("TaskName")
             .setSpanKind(SpanKind.SERVER)
             //.addLink(outerSpan.spanContext)
-            .setParent(Context.current().with(outerSpan))
+            // .setParent(Context.current().with(outerSpan))
+            .setParent(extractedContext)
             .startSpan()
 
-        taskSpan.setAttribute("Attr 1", "first attribute value")
-        taskSpan.setAttribute("Attr 2", "second attribute value")
+        taskSpan.setAttribute("attr.1", "foo")
+        taskSpan.setAttribute("attr.2", "bar")
         taskSpan.addEvent("something happened!! ")
         Thread.sleep(2)
         taskSpan.end()
@@ -57,11 +103,35 @@ class OpenTelemetryTests
         }
 
         val presenter = TimelinePresenter()
-        println(presenter.present( provider.spans()))
+        println(presenter.present(provider.spans()))
 
         // give it time to make it to zipkin
-        Thread.sleep(50)
+        //Thread.sleep(50)
+
+        val spansAnalyser = SimpleSpansAnalyser(provider.spans())
+       // assertThat(spansAnalyser.traceIds().size, equalTo(1))
+        assertThat(spansAnalyser.filterHasAttribute("attr.1").size, equalTo(1))
 
     }
 
+    @Test
+    fun `should trace client to server`() {
+        val clientTracer = buildTracer("client")
+        val serverTracer = buildTracer("tracer")
+
+
+        val server = DummyServer(serverTracer)
+        val client = DummyClient(clientTracer, server)
+
+        val traceId = UUID.randomUUID()
+
+        client.exec(traceId, "foobar")
+
+        // give it time to make it to zipkin
+        //Thread.sleep(50)
+    }
+
+    private fun buildTracer(scope: String): Tracer {
+        return provider.provider().getTracer(scope)
+    }
 }

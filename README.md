@@ -7,6 +7,19 @@
 
 Some helpers and support classes for [Open Telemetry](https://opentelemetry.io/)
 
+## Running Tests 
+
+Most unit tests are setup to automatically send metric to a locally running ZipKin 
+collector, if running -  this makes it easier to analyse the output. To start Zipkin, run 
+
+```bash
+docker run --rm -it --name zipkin \
+  -p 9411:9411 -d \
+  openzipkin/zipkin:latest
+```
+
+Then open the [Zipkin UI](http://localhost:9411/zipkin/).
+
 ## Dependencies
 
 As with everything in [Dreifa dot App](https://dreifa.app), this library has minimal dependencies:

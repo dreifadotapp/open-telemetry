@@ -35,6 +35,7 @@ class ZipKinOpenTelemetryProvider() : OpenTelemetryProvider {
     private val endpoint = String.format("http://%s:%s/api/v2/spans", "localhost", 9411)
     private val zipkinExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build()
     private val inMemory = InMemorySpanExporter(zipkinExporter)
+    private val propogators = MyPropagators()
     private val sdk: OpenTelemetrySdk = OpenTelemetrySdk.builder()
         .setTracerProvider(
             SdkTracerProvider.builder()
@@ -43,7 +44,9 @@ class ZipKinOpenTelemetryProvider() : OpenTelemetryProvider {
                 .setSampler(Sampler.alwaysOn())
                 .build()
         )
+        .setPropagators(propogators)
         .build()
+
 
     override fun provider() = sdk
 

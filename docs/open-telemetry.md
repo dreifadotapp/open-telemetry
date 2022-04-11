@@ -6,6 +6,8 @@ https://github.com/open-telemetry/opentelemetry-java-docs/blob/main/sdk-usage/bu
 
 https://github.com/open-telemetry/opentelemetry-java-docs/tree/main/zipkin
 
+https://opentelemetry.io/docs/instrumentation/java/manual/#context-propagation
+
 
 
 https://refactoring.guru/design-patterns/chain-of-responsibility
