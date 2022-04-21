@@ -35,6 +35,10 @@ class Y : TextMapGetter<Carrier> {
     }
 }
 
+class NoopTextMapGetter : TextMapGetter<Carrier> {
+    override fun keys(carrier: Carrier): Iterable<String> = emptyList()
+    override fun get(carrier: Carrier?, key: String): String? = null
+}
 
 class MyPropagators : ContextPropagators {
     override fun getTextMapPropagator(): TextMapPropagator = MyTextMapPropagator()
@@ -58,29 +62,21 @@ class MyTextMapPropagator : TextMapPropagator {
     }
 
     override fun <C : Any?> extract(context: Context, carrier: C?, getter: TextMapGetter<C>): Context {
-        println("todo")
-        val k = ContextKey.named<String>("opentelemetry-trace-span-key")
-        //val x = ImplicitContextKeyed()
-        //context.with {  }
-        //context.with()
-        // getter.
-        val c = (carrier as Carrier)
-        val ctx = ImmutableSpanContext.create(
-            c.traceId,
-            c.spanId,
-            TraceFlags.getDefault(),
-            TraceState.getDefault(),
-            true,
-            false
-        )
+        return if (carrier is Carrier) {
+            val ctx = ImmutableSpanContext.create(
+                carrier.traceId,
+                carrier.spanId,
+                TraceFlags.getDefault(),
+                TraceState.getDefault(),
+                true,
+                false
+            )
 
-        val myspan = Span.wrap(ctx)
-
-        context.with(myspan)
-
-        //val updated = context.with(k, myspan as String)
-        val updated = context.with(myspan)
-        return updated
+            val propagatedSpan = Span.wrap(ctx)
+            context.with(propagatedSpan)
+        } else {
+            Context.current()
+        }
     }
 
 }
@@ -92,32 +88,20 @@ class MyTextMapPropagator : TextMapPropagator {
 //
 //}
 
-class Wibble(private val p : OpenTelemetryProvider) {
+class ParentContext(val traceId: String, val spanId: String) {
+    companion object {
+        val root = ParentContext("", "")
+    }
+}
 
-    fun setScope(traceId : String, spanId: String) : Scope {
+class ContextHelper(private val p: OpenTelemetryProvider) {
+    fun createContext(traceId: String, spanId: String): Context {
         val propagator = p.provider().propagators.textMapPropagator
-        val getter = Y()
-        val c = Carrier(traceId = traceId, spanId = spanId )
-
-        val xx: Context =  propagator.extract(Context.current(), c, getter)
-        return xx.makeCurrent()
+        val c = Carrier(traceId = traceId, spanId = spanId)
+        return propagator.extract(Context.current(), c, NoopTextMapGetter())
     }
 
-    fun createContext(traceId : String, spanId: String) : Context {
-        val propagator = p.provider().propagators.textMapPropagator
-        val getter = Y()
-        val c = Carrier(traceId = traceId, spanId = spanId )
-
-        val xx: Context =  propagator.extract(Context.current(), c, getter)
-        return xx
+    fun createContext(parent : ParentContext) : Context {
+        return createContext(parent.traceId, parent.spanId)
     }
-
-
-    fun xx () {
-
-        val propagator = p.provider().propagators.textMapPropagator
-
-
-    }
-
 }

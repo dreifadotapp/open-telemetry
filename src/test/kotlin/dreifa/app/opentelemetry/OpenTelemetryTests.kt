@@ -12,7 +12,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -126,24 +125,23 @@ class OpenTelemetryTests {
         val clientTracer = buildTracer("client")
         val serverTracer = buildTracer("tracer")
 
-        val ctx = Context.current()
-        println(ctx.javaClass.name)
-        val s = clientTracer.spanBuilder("wibble").startSpan()
+        val server1 = DummyServer1(serverTracer, provider)
+        val server2 = DummyServer2(serverTracer, provider)
+        val client = DummyClient(clientTracer, server1, server2)
 
-        val ctx2 = s.spanContext
-        println(ctx2.javaClass.name)
-
-        val server = DummyServer(serverTracer, provider)
-        val client = DummyClient(clientTracer, provider, server)
-
-        val traceId = UUID.randomUUID().toString().replace("-", "")
-
-        client.exec(ParentContext.root, "foobar")
+        client.exec("foobar")
 
         val spansAnalyser = SimpleSpansAnalyser(provider.spans())
 
-        spansAnalyser.traceIds().forEach {println(it)}
-        //assertThat(spansAnalyser.traceIds(), equalTo(setOf(traceId)))
+        assertThat(spansAnalyser.traceIds().size, equalTo(1))
+        assertThat(spansAnalyser.spanIds().size, equalTo(3))
+
+        val rootSpan = spansAnalyser.rootSpan()
+        assertThat(rootSpan.name, equalTo("DummyClient"))
+        assertThat(rootSpan.kind, equalTo(SpanKind.CLIENT))
+
+        val serverSpans = spansAnalyser.children(rootSpan)
+        assertThat(serverSpans.spanIds().size, equalTo(2))
 
     }
 

@@ -1,6 +1,7 @@
 package dreifa.app.opentelemetry
 
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.trace.SpanId
 import io.opentelemetry.sdk.trace.data.SpanData
 
 class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
@@ -27,9 +28,22 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
         return filterHasAttributeValue(key.key, value)
     }
 
-    fun traceIds(): Set<String> {
-        return spans.map { it.traceId }.toSet()
+    fun traceIds(): Set<String> = spans.map { it.traceId }.toSet()
+
+    fun spanIds(): Set<String> = spans.map { it.spanId }.toSet()
+
+    fun rootSpan(): SpanData = spans.single { it.parentSpanContext.spanId == SpanId.getInvalid() }
+
+    fun children(parent: SpanData): SimpleSpansAnalyser {
+        return SimpleSpansAnalyser(spans.filter { it.parentSpanContext.spanId == parent.spanId })
     }
+
+    fun firstSpan(): SpanData = spans[0]
+
+    fun secondSpan(): SpanData = spans[1]
+
+    fun lastSpan(): SpanData = spans.last()
+
 
     val size: Int = spans.size
 
