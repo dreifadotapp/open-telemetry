@@ -53,3 +53,4 @@ class ZipKinOpenTelemetryProvider() : OpenTelemetryProvider {
     fun spans() = inMemory.allSpans
 }
 
+

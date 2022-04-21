@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.*
 import io.opentelemetry.context.Context
 import io.opentelemetry.context.ContextKey
 import io.opentelemetry.context.ImplicitContextKeyed
+import io.opentelemetry.context.Scope
 import io.opentelemetry.context.propagation.ContextPropagators
 import io.opentelemetry.context.propagation.TextMapGetter
 import io.opentelemetry.context.propagation.TextMapPropagator
@@ -51,6 +52,7 @@ class MyTextMapPropagator : TextMapPropagator {
         println("todo")
 
         val k = ContextKey.named<Any>("opentelemetry-trace-span-key")
+        println(k.javaClass.name)
         val x = context.get(k)
         println(x)
     }
@@ -83,9 +85,39 @@ class MyTextMapPropagator : TextMapPropagator {
 
 }
 
-class Z : ImplicitContextKeyed {
-    override fun storeInContext(context: Context): Context {
-        TODO("Not yet implemented")
+//class Z : ImplicitContextKeyed {
+//    override fun storeInContext(context: Context): Context {
+//        TODO("Not yet implemented")
+//    }
+//
+//}
+
+class Wibble(private val p : OpenTelemetryProvider) {
+
+    fun setScope(traceId : String, spanId: String) : Scope {
+        val propagator = p.provider().propagators.textMapPropagator
+        val getter = Y()
+        val c = Carrier(traceId = traceId, spanId = spanId )
+
+        val xx: Context =  propagator.extract(Context.current(), c, getter)
+        return xx.makeCurrent()
+    }
+
+    fun createContext(traceId : String, spanId: String) : Context {
+        val propagator = p.provider().propagators.textMapPropagator
+        val getter = Y()
+        val c = Carrier(traceId = traceId, spanId = spanId )
+
+        val xx: Context =  propagator.extract(Context.current(), c, getter)
+        return xx
+    }
+
+
+    fun xx () {
+
+        val propagator = p.provider().propagators.textMapPropagator
+
+
     }
 
 }

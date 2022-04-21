@@ -38,15 +38,20 @@ class OpenTelemetryTests {
 
     @Test
     fun `should log something!`() {
-
         //provider.provider().getTracer("fgdhsjsd").spanBuilder("wibble").setSpanKind(SpanKind.CLIENT).startSpan().end()
-
 
         var tracer: Tracer = provider.provider().getTracer("dreifa.app.tasks.Tracer")
 
         val propogator = provider.provider().propagators.textMapPropagator
         println(propogator)
+        val getter = Y()
+        val c = Carrier(traceId ="00000000000000000000000000000001", spanId = "0000000000000001" )
 
+        val xx: Context =  propogator
+            .extract(Context.current(), c, getter)
+
+        println(xx)
+        xx.makeCurrent()
 
         val outerSpan: Span = tracer.spanBuilder("Client")
             .setSpanKind(SpanKind.CLIENT)
@@ -57,6 +62,8 @@ class OpenTelemetryTests {
         val y = Y()
         val carrier = Carrier("000086bcaa3febcb0129ac0d6322edff", outerSpan.spanContext.spanId)
 
+        val x = X()
+        propogator.inject(Context.current(),carrier,x)
 
         val extractedContext: Context = propogator
             .extract(Context.current(), carrier, y)
@@ -119,16 +126,25 @@ class OpenTelemetryTests {
         val clientTracer = buildTracer("client")
         val serverTracer = buildTracer("tracer")
 
+        val ctx = Context.current()
+        println(ctx.javaClass.name)
+        val s = clientTracer.spanBuilder("wibble").startSpan()
 
-        val server = DummyServer(serverTracer)
-        val client = DummyClient(clientTracer, server)
+        val ctx2 = s.spanContext
+        println(ctx2.javaClass.name)
 
-        val traceId = UUID.randomUUID()
+        val server = DummyServer(serverTracer, provider)
+        val client = DummyClient(clientTracer, provider, server)
 
-        client.exec(traceId, "foobar")
+        val traceId = UUID.randomUUID().toString().replace("-", "")
 
-        // give it time to make it to zipkin
-        //Thread.sleep(50)
+        client.exec(ParentContext.root, "foobar")
+
+        val spansAnalyser = SimpleSpansAnalyser(provider.spans())
+
+        spansAnalyser.traceIds().forEach {println(it)}
+        //assertThat(spansAnalyser.traceIds(), equalTo(setOf(traceId)))
+
     }
 
     private fun buildTracer(scope: String): Tracer {
