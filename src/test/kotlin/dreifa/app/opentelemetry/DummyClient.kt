@@ -3,7 +3,12 @@ package dreifa.app.opentelemetry
 import io.opentelemetry.api.trace.*
 import io.opentelemetry.context.Context
 import io.opentelemetry.context.Scope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.lang.RuntimeException
+import java.util.concurrent.Executors
 
 /**
  * Emulate the client side
@@ -28,8 +33,18 @@ class DummyClient(
                     throw RuntimeException("Opps!")
                 }
                 val parentContext = buildParentContext(span)
-                server1.exec(parentContext, payload)
-                server2.exec(parentContext, payload)
+
+               // runBlocking {
+               //     val job1 = launch(Dispatchers.Default) {
+                        server1.exec(parentContext, payload)
+               //     }
+               //     val job2 = launch(Dispatchers.Default) {
+                        server2.exec(parentContext, payload)
+               //     }
+               // }
+
+
+                //server2.exec(parentContext, payload)
                 completeSpan(span)
             } catch (ex: Exception) {
                 completeSpan(span, ex)
@@ -63,6 +78,11 @@ class DummyClient(
     private fun createInitialContext(): Scope {
         // todo - should be doing something here
         return Context.root().makeCurrent()
+    }
+
+
+    suspend fun differentThread() = withContext(Dispatchers.Default){
+        println("Different thread")
     }
 
 

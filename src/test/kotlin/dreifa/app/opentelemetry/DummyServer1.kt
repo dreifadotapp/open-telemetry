@@ -14,6 +14,7 @@ class DummyServer1(
     fun exec(parent: ParentContext, payload: String) {
         setParentContext(parent).use {
             val span = startSpan()
+            Thread.sleep(10)
             try {
                 if (payload.contains("server", true) &&
                     payload.contains("error", true)

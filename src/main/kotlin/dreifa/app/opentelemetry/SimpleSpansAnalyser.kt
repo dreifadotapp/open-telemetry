@@ -35,7 +35,31 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
     fun rootSpan(): SpanData = spans.single { it.parentSpanContext.spanId == SpanId.getInvalid() }
 
     fun children(parent: SpanData): SimpleSpansAnalyser {
-        return SimpleSpansAnalyser(spans.filter { it.parentSpanContext.spanId == parent.spanId })
+        val filtered = spans.filter {
+            it.parentSpanContext.spanId == parent.spanId &&
+                    it.parentSpanContext.traceId == parent.traceId
+        }
+        return SimpleSpansAnalyser(filtered)
+    }
+
+    fun children(parent: SimpleSpanAnalyser): SimpleSpansAnalyser {
+        return children(parent.span)
+    }
+
+    fun overlapping(): Boolean {
+        if (spans.size >= 2) {
+            val timeOrdered = spans.sortedBy { it.startEpochNanos }
+            var endEpoch = timeOrdered[0].endEpochNanos
+            for (i in 1..spans.size - 1) {
+                if (timeOrdered[i].startEpochNanos <= endEpoch) {
+                    return true
+                } else {
+                    endEpoch = timeOrdered[i].endEpochNanos
+                }
+            }
+        }
+
+        return false
     }
 
     fun firstSpan(): SpanData = spans[0]
@@ -44,11 +68,11 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
 
     fun lastSpan(): SpanData = spans.last()
 
-
     val size: Int = spans.size
 
     override fun iterator(): Iterator<SpanData> = spans.iterator()
 
 }
 
+fun List<SpanData>.analyser(): SimpleSpansAnalyser = SimpleSpansAnalyser(this)
 

@@ -2,7 +2,7 @@ package dreifa.app.opentelemetry
 
 import io.opentelemetry.sdk.trace.data.SpanData
 
-class SimpleSpanAnalyser(private val span: SpanData) {
+class SimpleSpanAnalyser(val span: SpanData) {
 
     fun hasAttribute(key: String): Boolean {
         var found = false
@@ -19,4 +19,15 @@ class SimpleSpanAnalyser(private val span: SpanData) {
         }
         return found
     }
+
+    val name = span.name
+
+    val kind = span.kind
+
+    val spanId = span.spanId
+
+    val traceId = span.traceId
+
 }
+
+fun SpanData.analyser(): SimpleSpanAnalyser = SimpleSpanAnalyser(this)
