@@ -11,7 +11,6 @@ buildscript {
 plugins {
     id 'java'
     id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
-    //id("org.jetbrains.dokka") version "1.5.30"
 }
 
 apply plugin: 'kotlin'
@@ -41,14 +40,20 @@ jar {
 }
 
 dependencies {
+    // Note: Jitpack will publish "compile" scopes setting as <scope>compile</scope> in the pom.xml
+    // but "implementation" is published with <scope>runtime</scope>
+    //
+    // The decision is a a little arbitrary, but key deps are published with compile scope
+    //
+
     implementation("com.github.jitpack:gradle-simple:1.0")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-
 
     implementation "com.github.dreifadotapp:registry:$registryVersion"
 
     compile "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
     compile "io.opentelemetry:opentelemetry-exporter-logging:$opentelemetryVersion"
+
     implementation "io.grpc:grpc-context:$opentelemetryVersion"
 
 
