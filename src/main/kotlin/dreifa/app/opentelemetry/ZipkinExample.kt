@@ -14,7 +14,7 @@ class ZipkinExample(tracerProvider: TracerProvider) {
         // Generate span
         val span: Span = tracer.spanBuilder("Start my wonderful use case").startSpan()
         try {
-            span.makeCurrent().use { scope ->
+            span.makeCurrent().use { _ ->
                 // Add some Event to the span
                 span.addEvent("Event 0")
                 // execute my use case - here we simulate a wait

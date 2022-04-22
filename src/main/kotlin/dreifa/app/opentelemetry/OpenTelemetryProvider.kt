@@ -8,8 +8,6 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
-import java.lang.String
-
 
 interface OpenTelemetryProvider {
     fun provider(): OpenTelemetrySdk
