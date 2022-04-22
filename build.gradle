@@ -47,8 +47,8 @@ dependencies {
 
     implementation "com.github.dreifadotapp:registry:$registryVersion"
 
-    implementation "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
-    implementation "io.opentelemetry:opentelemetry-exporter-logging:$opentelemetryVersion"
+    compile "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
+    compile "io.opentelemetry:opentelemetry-exporter-logging:$opentelemetryVersion"
     implementation "io.grpc:grpc-context:$opentelemetryVersion"
 
 
