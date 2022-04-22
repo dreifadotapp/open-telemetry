@@ -4,6 +4,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.api.trace.Tracer
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +35,9 @@ class OpenTelemetryTests {
         val server2 = DummyServer2(serverTracer, provider)
         val client = DummyClient(clientTracer, server1, server2)
 
-        client.exec("foobar")
+        runBlocking {
+            client.exec("foobar")
+        }
 
         val spansAnalyser = provider.spans().analyser()
 

@@ -2,13 +2,10 @@ package dreifa.app.opentelemetry
 
 import io.opentelemetry.api.trace.*
 import io.opentelemetry.context.Context
-import io.opentelemetry.context.Scope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import io.opentelemetry.extension.kotlin.asContextElement
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.lang.RuntimeException
-import java.util.concurrent.Executors
 
 /**
  * Emulate the client side
@@ -17,13 +14,10 @@ class DummyClient(
     private val tracer: Tracer,
     private val server1: DummyServer1,
     private val server2: DummyServer2
-
 ) {
 
-    fun exec(payload: String) {
-        val ctx = createInitialContext()
-
-        ctx.use {
+    suspend fun exec(payload: String) {
+        withContext(Context.current().asContextElement()) {
 
             val span = startSpan()
             try {
@@ -34,17 +28,11 @@ class DummyClient(
                 }
                 val parentContext = buildParentContext(span)
 
-               // runBlocking {
-               //     val job1 = launch(Dispatchers.Default) {
-                        server1.exec(parentContext, payload)
-               //     }
-               //     val job2 = launch(Dispatchers.Default) {
-                        server2.exec(parentContext, payload)
-               //     }
-               // }
+                runBlocking {
+                    server1.exec(parentContext, payload)
+                    server2.exec(parentContext, payload)
+                }
 
-
-                //server2.exec(parentContext, payload)
                 completeSpan(span)
             } catch (ex: Exception) {
                 completeSpan(span, ex)
@@ -73,17 +61,5 @@ class DummyClient(
         span.setStatus(StatusCode.ERROR)
         span.end()
     }
-
-
-    private fun createInitialContext(): Scope {
-        // todo - should be doing something here
-        return Context.root().makeCurrent()
-    }
-
-
-    suspend fun differentThread() = withContext(Dispatchers.Default){
-        println("Different thread")
-    }
-
 
 }

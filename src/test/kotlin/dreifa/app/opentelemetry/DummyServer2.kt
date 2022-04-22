@@ -1,8 +1,11 @@
 package dreifa.app.opentelemetry
 
 import io.opentelemetry.api.trace.*
-import io.opentelemetry.context.Scope
+import io.opentelemetry.context.Context
+import io.opentelemetry.extension.kotlin.asContextElement
+import kotlinx.coroutines.withContext
 import java.lang.RuntimeException
+import kotlin.random.Random
 
 class DummyServer2(
     private val tracer: Tracer,
@@ -11,9 +14,11 @@ class DummyServer2(
 
     private val helper = ContextHelper(provider)
 
-    fun exec(parent: ParentContext, payload: String) {
-        setParentContext(parent).use {
+    suspend fun exec(parent: ParentContext, payload: String) {
+        withContext(setParentContext(parent).asContextElement()) {
+
             val span = startSpan()
+            Thread.sleep(Random.nextLong(10))
             try {
                 if (payload.contains("server", true) &&
                     payload.contains("error", true)
@@ -46,7 +51,7 @@ class DummyServer2(
         span.end()
     }
 
-    private fun setParentContext(parent: ParentContext): Scope {
-        return helper.createContext(parent).makeCurrent()
+    private fun setParentContext(parent: ParentContext): Context {
+        return helper.createContext(parent)
     }
 }

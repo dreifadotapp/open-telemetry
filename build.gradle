@@ -28,6 +28,11 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     }
 }
 
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     reports { junitXml.setEnabled(true) }
@@ -41,9 +46,9 @@ jar {
 
 dependencies {
     // Note: Jitpack will publish "compile" scopes setting as <scope>compile</scope> in the pom.xml
-    // but "implementation" is published with <scope>runtime</scope>
+    // but "implementation" is only published with <scope>runtime</scope>
     //
-    // The decision is a a little arbitrary, but key deps are published with compile scope
+    // The decision is a a little arbitrary, but key deps are published with compile scope.
     //
 
     implementation("com.github.jitpack:gradle-simple:1.0")
@@ -53,6 +58,7 @@ dependencies {
 
     compile "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
     compile "io.opentelemetry:opentelemetry-exporter-logging:$opentelemetryVersion"
+    compile "io.opentelemetry:opentelemetry-extension-kotlin:$opentelemetryVersion"
 
     implementation "io.grpc:grpc-context:$opentelemetryVersion"
 
