@@ -14,7 +14,7 @@ class DummyServer1(
 
     private val helper = ContextHelper(provider)
 
-    suspend fun exec(parent: ParentContext, payload: String) {
+    suspend fun exec(parent: OpenTelemetryContext, payload: String) {
         withContext(setParentContext(parent).asContextElement()) {
 
             val span = startSpan()
@@ -50,7 +50,7 @@ class DummyServer1(
         span.end()
     }
 
-    private fun setParentContext(parent: ParentContext): Context {
+    private fun setParentContext(parent: OpenTelemetryContext): Context {
         return helper.createContext(parent)
     }
 }

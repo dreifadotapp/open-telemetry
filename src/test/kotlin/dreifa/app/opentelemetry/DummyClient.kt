@@ -40,8 +40,8 @@ class DummyClient(
         }
     }
 
-    private fun buildParentContext(span: Span): ParentContext {
-        return ParentContext(span.spanContext.traceId, span.spanContext.spanId)
+    private fun buildParentContext(span: Span): OpenTelemetryContext {
+        return OpenTelemetryContext(span.spanContext.traceId, span.spanContext.spanId)
     }
 
     private fun startSpan(): Span {

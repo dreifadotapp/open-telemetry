@@ -9,15 +9,19 @@ import io.opentelemetry.context.propagation.TextMapPropagator
 import io.opentelemetry.context.propagation.TextMapSetter
 
 // the information passed between layers
-class ParentContext(val traceId: String, val spanId: String) {
+class OpenTelemetryContext(val traceId: String, val spanId: String) {
     companion object {
-        val root = ParentContext("", "")
+        val root = OpenTelemetryContext(TraceId.getInvalid(), Span.getInvalid().toString())
     }
+
+    fun isRoot() = this == root
+
+    fun isNested() = !isRoot()
 }
 
-class NoopTextMapGetter : TextMapGetter<ParentContext> {
-    override fun keys(carrier: ParentContext): Iterable<String> = emptyList()
-    override fun get(carrier: ParentContext?, key: String): String? = null
+class NoopTextMapGetter : TextMapGetter<OpenTelemetryContext> {
+    override fun keys(carrier: OpenTelemetryContext): Iterable<String> = emptyList()
+    override fun get(carrier: OpenTelemetryContext?, key: String): String? = null
 }
 
 class MyPropagators : ContextPropagators {
@@ -35,7 +39,7 @@ class MyTextMapPropagator : TextMapPropagator {
     }
 
     override fun <C : Any?> extract(context: Context, carrier: C?, getter: TextMapGetter<C>): Context {
-        return if (carrier is ParentContext) {
+        return if (carrier is OpenTelemetryContext) {
             val ctx = ImmutableSpanContext.create(
                 carrier.traceId,
                 carrier.spanId,
@@ -57,11 +61,11 @@ class MyTextMapPropagator : TextMapPropagator {
 class ContextHelper(private val p: OpenTelemetryProvider) {
     private fun createContext(traceId: String, spanId: String): Context {
         val propagator = p.sdk().propagators.textMapPropagator
-        val c = ParentContext(traceId = traceId, spanId = spanId)
+        val c = OpenTelemetryContext(traceId = traceId, spanId = spanId)
         return propagator.extract(Context.current(), c, NoopTextMapGetter())
     }
 
-    fun createContext(parent: ParentContext): Context {
+    fun createContext(parent: OpenTelemetryContext): Context {
         return createContext(parent.traceId, parent.spanId)
     }
 }
