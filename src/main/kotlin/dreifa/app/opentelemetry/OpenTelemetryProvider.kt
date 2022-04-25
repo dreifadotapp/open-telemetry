@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 
 interface OpenTelemetryProvider {
-    fun provider(): OpenTelemetrySdk
+    fun sdk(): OpenTelemetrySdk
 }
 
 class InMemoryOpenTelemetryProvider() : OpenTelemetryProvider {
@@ -24,7 +24,7 @@ class InMemoryOpenTelemetryProvider() : OpenTelemetryProvider {
         )
         .build()
 
-    override fun provider() = sdk
+    override fun sdk() = sdk
 
     fun spans() = inMemory.allSpans
 }
@@ -34,6 +34,7 @@ class ZipKinOpenTelemetryProvider() : OpenTelemetryProvider {
     private val zipkinExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build()
     private val inMemory = InMemorySpanExporter(zipkinExporter)
     private val propagators = MyPropagators()
+
     private val sdk: OpenTelemetrySdk = OpenTelemetrySdk.builder()
         .setTracerProvider(
             SdkTracerProvider.builder()
@@ -46,7 +47,7 @@ class ZipKinOpenTelemetryProvider() : OpenTelemetryProvider {
         .build()
 
 
-    override fun provider() = sdk
+    override fun sdk() = sdk
 
     fun spans() = inMemory.allSpans
 }

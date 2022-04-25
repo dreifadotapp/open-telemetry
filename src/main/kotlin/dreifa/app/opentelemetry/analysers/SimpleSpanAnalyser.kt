@@ -1,4 +1,4 @@
-package dreifa.app.opentelemetry
+package dreifa.app.opentelemetry.analysers
 
 import io.opentelemetry.sdk.trace.data.SpanData
 
@@ -30,4 +30,3 @@ class SimpleSpanAnalyser(val span: SpanData) {
 
 }
 
-fun SpanData.analyser(): SimpleSpanAnalyser = SimpleSpanAnalyser(this)

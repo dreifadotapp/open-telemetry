@@ -1,4 +1,4 @@
-package dreifa.app.opentelemetry
+package dreifa.app.opentelemetry.analysers
 
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.SpanId
@@ -74,5 +74,4 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
 
 }
 
-fun List<SpanData>.analyser(): SimpleSpansAnalyser = SimpleSpansAnalyser(this)
 

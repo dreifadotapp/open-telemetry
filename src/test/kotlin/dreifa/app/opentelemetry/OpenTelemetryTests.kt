@@ -54,6 +54,6 @@ class OpenTelemetryTests {
     }
 
     private fun buildTracer(scope: String): Tracer {
-        return provider.provider().getTracer(scope)
+        return provider.sdk().getTracer(scope)
     }
 }

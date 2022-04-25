@@ -56,7 +56,7 @@ class MyTextMapPropagator : TextMapPropagator {
 
 class ContextHelper(private val p: OpenTelemetryProvider) {
     private fun createContext(traceId: String, spanId: String): Context {
-        val propagator = p.provider().propagators.textMapPropagator
+        val propagator = p.sdk().propagators.textMapPropagator
         val c = ParentContext(traceId = traceId, spanId = spanId)
         return propagator.extract(Context.current(), c, NoopTextMapGetter())
     }

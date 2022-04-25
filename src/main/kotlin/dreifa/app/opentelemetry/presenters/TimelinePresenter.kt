@@ -4,7 +4,6 @@ import io.opentelemetry.sdk.trace.data.SpanData
 import java.lang.StringBuilder
 
 class TimelinePresenter {
-
     fun present(spans: List<SpanData>): String {
 
         var epochStart: Long = Long.MAX_VALUE
