@@ -51,6 +51,14 @@ class OpenTelemetryTests {
         val serverSpans = spansAnalyser.children(rootSpan)
         assertThat(serverSpans.spanIds().size, equalTo(2))
         assert(!serverSpans.overlapping())
+
+        // check sorting and indexing of SpansAnalyser - by default is chronological
+        assertThat(spansAnalyser.firstSpan().name, equalTo("DummyClient"))
+        assertThat(spansAnalyser[0].name, equalTo("DummyClient"))
+        assertThat(spansAnalyser.secondSpan().name, equalTo("DummyServer1"))
+        assertThat(spansAnalyser[1].name, equalTo("DummyServer1"))
+        assertThat(spansAnalyser.lastSpan().name, equalTo("DummyServer2"))
+        assertThat(spansAnalyser[2].name, equalTo("DummyServer2"))
     }
 
     private fun buildTracer(scope: String): Tracer {

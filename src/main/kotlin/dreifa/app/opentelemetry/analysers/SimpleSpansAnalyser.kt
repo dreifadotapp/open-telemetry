@@ -6,7 +6,8 @@ import io.opentelemetry.sdk.trace.data.SpanData
 
 class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
     // deep copy to be sure there are no changes
-    private val spans: List<SpanData> = ArrayList(spans)
+    // and that spans are in chronological order
+    private val spans: List<SpanData> = ArrayList(spans.sortedBy { it.startEpochNanos })
 
     fun filterTraceId(traceId: String): SimpleSpansAnalyser {
         return SimpleSpansAnalyser(spans.filter { it.traceId == traceId })
@@ -71,6 +72,8 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
     val size: Int = spans.size
 
     override fun iterator(): Iterator<SpanData> = spans.iterator()
+
+    operator fun get(index: Int) = spans[index]
 
 }
 
