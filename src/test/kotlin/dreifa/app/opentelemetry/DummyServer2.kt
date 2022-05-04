@@ -36,7 +36,7 @@ class DummyServer2(
         return tracer.spanBuilder("DummyServer2")
             .setSpanKind(SpanKind.SERVER)
             .startSpan()
-            .setAttribute("server.attr", "foo")
+            .setAttribute("server.attr", "server2")
 
     }
 

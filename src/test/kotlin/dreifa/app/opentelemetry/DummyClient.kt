@@ -48,7 +48,7 @@ class DummyClient(
         return tracer.spanBuilder("DummyClient")
             .setSpanKind(SpanKind.CLIENT)
             .startSpan()
-            .setAttribute("client.attr", "foo")
+            .setAttribute("client.attr", "client")
     }
 
     private fun completeSpan(span: Span) {

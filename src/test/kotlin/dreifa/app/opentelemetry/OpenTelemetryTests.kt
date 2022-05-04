@@ -2,6 +2,7 @@ package dreifa.app.opentelemetry
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import dreifa.app.opentelemetry.analysers.SimpleSpansAnalyser
 import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.api.trace.Tracer
 import kotlinx.coroutines.runBlocking
@@ -59,6 +60,23 @@ class OpenTelemetryTests {
         assertThat(spansAnalyser[1].name, equalTo("DummyServer1"))
         assertThat(spansAnalyser.lastSpan().name, equalTo("DummyServer2"))
         assertThat(spansAnalyser[2].name, equalTo("DummyServer2"))
+
+        // check filtering by attr
+        assertThat(spansAnalyser.filterHasAttribute("server.attr").size, equalTo(3))
+        assertThat(spansAnalyser.filterHasAttribute("server.attr", SimpleSpansAnalyser.MatchingRule.AnySpanInTraceId).size, equalTo(3))
+        assertThat(spansAnalyser.filterHasAttribute("server.attr", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(2))
+        assert(spansAnalyser.filterHasAttribute("missing.attr").isEmpty())
+
+        // check filtering by attr / value
+        assertThat(spansAnalyser.filterHasAttributeValue("server.attr", "server1").size, equalTo(3))
+        assertThat(spansAnalyser.filterHasAttributeValue("server.attr", "server2").size, equalTo(3))
+        assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client").size, equalTo(3))
+        assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.AnySpanInTraceId).size, equalTo(3))
+        assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(1))
+        assert(spansAnalyser.filterHasAttributeValue("client.attr", "missing value", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
+        assert(spansAnalyser.filterHasAttributeValue("missing.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
+
+
     }
 
     private fun buildTracer(scope: String): Tracer {

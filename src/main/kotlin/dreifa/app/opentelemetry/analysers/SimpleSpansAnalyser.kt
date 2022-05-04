@@ -5,6 +5,12 @@ import io.opentelemetry.api.trace.SpanId
 import io.opentelemetry.sdk.trace.data.SpanData
 
 class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
+
+    enum class MatchingRule {
+        SingleSpan,         // only apply the rule to the Span being checked
+        AnySpanInTraceId,   // checks all spans within the traceId, regardless of the position in the hierarchy
+    }
+
     // deep copy to be sure there are no changes
     // and that spans are in chronological order
     private val spans: List<SpanData> = ArrayList(spans.sortedBy { it.startEpochNanos })
@@ -13,16 +19,51 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
         return SimpleSpansAnalyser(spans.filter { it.traceId == traceId })
     }
 
-    fun filterHasAttribute(key: String): SimpleSpansAnalyser {
-        return SimpleSpansAnalyser(spans.filter { SimpleSpanAnalyser(it).hasAttribute(key) })
+    fun filterHasAttribute(key: String, rule: MatchingRule = MatchingRule.AnySpanInTraceId): SimpleSpansAnalyser {
+        return when (rule) {
+            MatchingRule.SingleSpan -> {
+                SimpleSpansAnalyser(spans.filter { SimpleSpanAnalyser(it).hasAttribute(key) })
+            }
+            MatchingRule.AnySpanInTraceId -> {
+                val filtered = ArrayList<SpanData>()
+                traceIds().forEach { traceId ->
+                    val spansForTraceId = filterTraceId(traceId)
+                    if (spansForTraceId.filterHasAttribute(key, MatchingRule.SingleSpan).isNotEmpty()) {
+                        filtered.addAll(spansForTraceId.spans)
+                    }
+                }
+                SimpleSpansAnalyser(filtered)
+            }
+        }
     }
 
-    fun filterHasAttribute(key: AttributeKey<Any>): SimpleSpansAnalyser {
-        return filterHasAttribute(key.key)
+    fun filterHasAttribute(
+        key: AttributeKey<Any>,
+        rule: MatchingRule = MatchingRule.AnySpanInTraceId
+    ): SimpleSpansAnalyser {
+        return filterHasAttribute(key.key, rule)
     }
 
-    fun filterHasAttributeValue(key: String, value: Any): SimpleSpansAnalyser {
-        return SimpleSpansAnalyser(spans.filter { SimpleSpanAnalyser(it).hasAttributeValue(key, value) })
+    fun filterHasAttributeValue(
+        key: String,
+        value: Any,
+        rule: MatchingRule = MatchingRule.AnySpanInTraceId
+    ): SimpleSpansAnalyser {
+        return when (rule) {
+            MatchingRule.SingleSpan -> {
+                SimpleSpansAnalyser(spans.filter { SimpleSpanAnalyser(it).hasAttributeValue(key, value) })
+            }
+            MatchingRule.AnySpanInTraceId -> {
+                val filtered = ArrayList<SpanData>()
+                traceIds().forEach { traceId ->
+                    val spansForTraceId = filterTraceId(traceId)
+                    if (spansForTraceId.filterHasAttributeValue(key, value, MatchingRule.SingleSpan).isNotEmpty()) {
+                        filtered.addAll(spansForTraceId.spans)
+                    }
+                }
+                SimpleSpansAnalyser(filtered)
+            }
+        }
     }
 
     fun filterHasAttributeValue(key: AttributeKey<Any>, value: Any): SimpleSpansAnalyser {
@@ -70,6 +111,10 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
     fun lastSpan(): SpanData = spans.last()
 
     val size: Int = spans.size
+
+    fun isEmpty(): Boolean = spans.isEmpty()
+
+    fun isNotEmpty(): Boolean = spans.isNotEmpty()
 
     override fun iterator(): Iterator<SpanData> = spans.iterator()
 

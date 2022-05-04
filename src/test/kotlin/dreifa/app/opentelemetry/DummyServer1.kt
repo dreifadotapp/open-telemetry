@@ -36,7 +36,7 @@ class DummyServer1(
         return tracer.spanBuilder("DummyServer1")
             .setSpanKind(SpanKind.SERVER)
             .startSpan()
-            .setAttribute("server.attr", "foo")
+            .setAttribute("server.attr", "server1")
     }
 
     private fun completeSpan(span: Span) {

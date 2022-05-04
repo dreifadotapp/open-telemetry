@@ -4,6 +4,8 @@ import io.opentelemetry.sdk.trace.data.SpanData
 
 class SimpleSpanAnalyser(val span: SpanData) {
 
+
+
     fun hasAttribute(key: String): Boolean {
         var found = false
         span.attributes.forEach { attributeKey, _ ->
