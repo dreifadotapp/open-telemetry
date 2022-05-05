@@ -9,7 +9,7 @@ import io.opentelemetry.context.propagation.TextMapPropagator
 import io.opentelemetry.context.propagation.TextMapSetter
 
 // the information passed between layers
-class OpenTelemetryContext(val traceId: String, val spanId: String) {
+data class OpenTelemetryContext(val traceId: String, val spanId: String) {
     private constructor(span: Span) : this(span.spanContext.traceId, span.spanContext.spanId)
     private constructor(spanContext: SpanContext) : this(spanContext.traceId, spanContext.spanId)
 

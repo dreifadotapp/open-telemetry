@@ -1,5 +1,6 @@
 package dreifa.app.opentelemetry.analysers
 
+import dreifa.app.types.CorrelationContext
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.SpanId
 import io.opentelemetry.sdk.trace.data.SpanData
@@ -69,6 +70,11 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
     fun filterHasAttributeValue(key: AttributeKey<Any>, value: Any): SimpleSpansAnalyser {
         return filterHasAttributeValue(key.key, value)
     }
+
+    fun filterHasAttributeValue(correlation: CorrelationContext): SimpleSpansAnalyser {
+        return filterHasAttributeValue(correlation.openTelemetryAttrName, correlation.id.id)
+    }
+
 
     fun traceIds(): Set<String> = spans.map { it.traceId }.toSet()
 

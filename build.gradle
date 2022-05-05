@@ -55,6 +55,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 
     implementation "com.github.dreifadotapp:registry:$registryVersion"
+    implementation "com.github.dreifadotapp:commons:$commonsVersion"
 
     compile "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
     compile "io.opentelemetry:opentelemetry-exporter-logging:$opentelemetryVersion"
