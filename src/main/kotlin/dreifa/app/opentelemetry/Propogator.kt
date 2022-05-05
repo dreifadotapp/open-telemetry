@@ -18,14 +18,24 @@ data class OpenTelemetryContext(val traceId: String, val spanId: String) {
 
     companion object {
         fun root() = rootOpenTelemetryContext
-        fun fromSpan(span : Span) : OpenTelemetryContext = OpenTelemetryContext(span)
-        fun fromSpanContext(spanContext : SpanContext) : OpenTelemetryContext = OpenTelemetryContext(spanContext)
+        fun fromSpan(span: Span): OpenTelemetryContext = OpenTelemetryContext(span)
+        fun fromSpanContext(spanContext: SpanContext): OpenTelemetryContext = OpenTelemetryContext(spanContext)
     }
 
     fun isRoot() = this == root()
 
     fun isNested() = !isRoot()
 }
+
+/**
+ * Something simple that is sure to serialise easily
+ */
+data class OpenTelemetryContextDTO(val traceId: String, val spanId: String) {
+    constructor(context: OpenTelemetryContext) : this(context.traceId, context.spanId)
+
+    fun context(): OpenTelemetryContext = OpenTelemetryContext(traceId, spanId)
+}
+
 
 class NoopTextMapGetter : TextMapGetter<OpenTelemetryContext> {
     override fun keys(carrier: OpenTelemetryContext): Iterable<String> = emptyList()
