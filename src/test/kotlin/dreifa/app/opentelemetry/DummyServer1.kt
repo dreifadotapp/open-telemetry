@@ -11,9 +11,7 @@ class DummyServer1(
     private val tracer: Tracer,
     provider: OpenTelemetryProvider
 ) {
-
     private val helper = ContextHelper(provider)
-
     suspend fun exec(parent: OpenTelemetryContext, payload: String) {
         withContext(setParentContext(parent).asContextElement()) {
 
