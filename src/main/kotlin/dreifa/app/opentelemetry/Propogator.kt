@@ -25,6 +25,8 @@ data class OpenTelemetryContext(val traceId: String, val spanId: String) {
     fun isRoot() = this == root()
 
     fun isNested() = !isRoot()
+
+    fun dto () : OpenTelemetryContextDTO = OpenTelemetryContextDTO(this)
 }
 
 /**
