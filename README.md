@@ -24,7 +24,7 @@ Then open the [Zipkin UI](http://localhost:9411/zipkin/).
 
 As with everything in [Dreifa dot App](https://dreifa.app), this library has minimal dependencies:
 
-* Kotlin 1.4
+* Kotlin 1.5
 * Java 11
 * The object [Registry](https://github.com/dreifadotapp/registry#readme)
 * The [Open Telemetry Java Libs](https://opentelemetry.io/docs/instrumentation/java/)
