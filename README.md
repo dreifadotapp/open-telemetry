@@ -52,7 +52,7 @@ Jaeger can be started locally with
 docker run --rm -it --name jaeger\
   -p 16686:16686 \
   -p 14250:14250 -d \
-  jaegertracing/all-in-one:1.16
+  jaegertracing/all-in-one:latest
 ```
 
 Then open the [Jaeger UI](http://localhost:16686/search)

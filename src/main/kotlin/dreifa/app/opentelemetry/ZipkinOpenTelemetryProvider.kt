@@ -11,22 +11,25 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 
-class ZipkinOpenTelemetryProvider(memoryCacheEnabled : Boolean = false) : OpenTelemetryProvider {
+class ZipkinOpenTelemetryProvider(
+    memoryCacheEnabled: Boolean = false,
+    serviceName: String = "dreifa-libs"
+) : OpenTelemetryProvider {
     private val endpoint = String.format("http://%s:%s/api/v2/spans", "localhost", 9411)
     private val zipkinExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build()
 
-    private val inMemory : InMemorySpanExporter = if (memoryCacheEnabled){
+    private val inMemory: InMemorySpanExporter = if (memoryCacheEnabled) {
         InMemorySpanExporter(zipkinExporter)
     } else {
         InMemorySpanExporter(null)
     }
-    private val exporter : SpanExporter = if (memoryCacheEnabled) inMemory else zipkinExporter
+    private val exporter: SpanExporter = if (memoryCacheEnabled) inMemory else zipkinExporter
     private val propagators = MyPropagators()
 
     private val sdk: OpenTelemetrySdk = OpenTelemetrySdk.builder()
         .setTracerProvider(
             SdkTracerProvider.builder()
-                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "dreifa")))
+                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName)))
                 .addSpanProcessor(SimpleSpanProcessor.create(exporter))
                 .setSampler(Sampler.alwaysOn())
                 .build()
@@ -37,5 +40,5 @@ class ZipkinOpenTelemetryProvider(memoryCacheEnabled : Boolean = false) : OpenTe
 
     override fun sdk() = sdk
 
-    override fun spans() : ArrayList<SpanData> = inMemory.allSpans
+    override fun spans(): ArrayList<SpanData> = inMemory.allSpans
 }

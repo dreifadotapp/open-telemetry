@@ -12,7 +12,10 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 import java.util.concurrent.TimeUnit
 
 
-class JaegerOpenTelemetryProvider(memoryCacheEnabled: Boolean = false) : OpenTelemetryProvider {
+class JaegerOpenTelemetryProvider(
+    memoryCacheEnabled: Boolean = false,
+    serviceName: String = "dreifa-libs"
+) : OpenTelemetryProvider {
     private val endpoint = "http://localhost:14250"
     private val jaegerExporter: JaegerGrpcSpanExporter = JaegerGrpcSpanExporter.builder()
         .setEndpoint(endpoint)
@@ -30,7 +33,7 @@ class JaegerOpenTelemetryProvider(memoryCacheEnabled: Boolean = false) : OpenTel
     private val sdk: OpenTelemetrySdk = OpenTelemetrySdk.builder()
         .setTracerProvider(
             SdkTracerProvider.builder()
-                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "dreifa")))
+                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, serviceName)))
                 .addSpanProcessor(SimpleSpanProcessor.create(exporter))
                 .setSampler(Sampler.alwaysOn())
                 .build()
