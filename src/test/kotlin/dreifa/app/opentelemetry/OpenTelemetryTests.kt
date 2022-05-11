@@ -17,7 +17,7 @@ class OpenTelemetryTests {
 
     @BeforeEach
     fun `fresh provider`() {
-        provider = ZipKinOpenTelemetryProvider(true)
+        provider = ZipkinOpenTelemetryProvider(true)
     }
 
     @AfterAll

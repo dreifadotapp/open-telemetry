@@ -11,7 +11,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 
-class ZipKinOpenTelemetryProvider(memoryCacheEnabled : Boolean = false) : OpenTelemetryProvider {
+class ZipkinOpenTelemetryProvider(memoryCacheEnabled : Boolean = false) : OpenTelemetryProvider {
     private val endpoint = String.format("http://%s:%s/api/v2/spans", "localhost", 9411)
     private val zipkinExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build()
 

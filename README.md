@@ -9,7 +9,7 @@ Some helpers and support classes for [Open Telemetry](https://opentelemetry.io/)
 
 ## Running Tests 
 
-Most unit tests are setup to automatically send metric to a locally running ZipKin 
+Most unit tests are setup to automatically send metric to a locally running Zipkin 
 collector, if running -  this makes it easier to analyse the output. To start Zipkin, run 
 
 ```bash
@@ -17,19 +17,55 @@ docker run --rm -it --name zipkin \
   -p 9411:9411 -d \
   openzipkin/zipkin:latest
 ```
-
 Then open the [Zipkin UI](http://localhost:9411/zipkin/).
 
-## Using Jaeger 
+## The 'OpenTelemetryProvider' interface 
 
-_todo: clean up notes_
+This interface provides a convenient DI friendly way of configuring an Open Telemetry exporter. Most of the higher level
+services in [Dreifa dot App](https://dreifa.app) usd this to initialise Open Telemetry
 
-https://opentelemetry.io/docs/instrumentation/js/exporters/
-https://www.jaegertracing.io/docs/1.33/getting-started/
+Some simple implementations are provided for testing purposes. Production code would likely 
+provide a custom implementation.
 
-https://github.com/open-telemetry/opentelemetry-java-docs/tree/main/jaeger
+### With Zipkin 
 
-ui is at - http://localhost:16686/search
+Use `ZipkinOpenTelemetryProvider`
+
+Zipkin can be started locally with 
+
+```bash
+docker run --rm -it --name zipkin \
+  -p 9411:9411 -d \
+  openzipkin/zipkin:latest
+```
+Then open the [Zipkin UI](http://localhost:9411/zipkin/).
+
+
+### With Jaeger 
+
+Use `JaegerOpenTelemetryProvider`
+
+Jaeger can be started locally with
+
+```bash
+docker run --rm -it --name jaeger\
+  -p 16686:16686 \
+  -p 14250:14250 -d \
+  jaegertracing/all-in-one:1.16
+```
+
+Then open the [Jaeger UI](http://localhost:16686/search) 
+
+Some useful links for Jaeger
+* https://opentelemetry.io/docs/instrumentation/js/exporters/
+* https://www.jaegertracing.io/docs/1.33/getting-started/
+* https://github.com/open-telemetry/opentelemetry-java-docs/tree/main/jaeger
+
+### InMemory only 
+
+This is enough to capture output and assert the results in testcase.
+
+Use `InMemoryOpenTelemetryProvider`
 
 ## Dependencies
 
@@ -54,4 +90,3 @@ implementation "com.github.dreifadotapp:open-telemetry:<release>"
 ```
 
 _JitPack build status is at https://jitpack.io/com/github/dreifadotapp/open-telemetry/$releaseTag/build.log_
-
