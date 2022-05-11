@@ -7,41 +7,42 @@
 
 Some helpers and support classes for [Open Telemetry](https://opentelemetry.io/)
 
-## Running Tests 
+## Running Tests
 
-Most unit tests are setup to automatically send metric to a locally running Zipkin 
-collector, if running -  this makes it easier to analyse the output. To start Zipkin, run 
+Most unit tests are setup to automatically send metric to a locally running Zipkin
+collector, if running - this makes it easier to analyse the output. To start Zipkin, run
 
 ```bash
 docker run --rm -it --name zipkin \
   -p 9411:9411 -d \
   openzipkin/zipkin:latest
 ```
+
 Then open the [Zipkin UI](http://localhost:9411/zipkin/).
 
-## The 'OpenTelemetryProvider' interface 
+## The 'OpenTelemetryProvider' interface
 
-This interface provides a convenient DI friendly way of configuring an Open Telemetry exporter. Most of the higher level
-services in [Dreifa dot App](https://dreifa.app) usd this to initialise Open Telemetry
+This interface provides a convenient DI friendly way of configuring the Open Telemetry Java SDK. Most of the higher
+level services in [Dreifa dot App](https://dreifa.app) use this to initialise Open Telemetry
 
-Some simple implementations are provided for testing purposes. Production code would likely 
+Some simple implementations are provided for testing purposes. Production code would likely
 provide a custom implementation.
 
-### With Zipkin 
+### With Zipkin
 
 Use `ZipkinOpenTelemetryProvider`
 
-Zipkin can be started locally with 
+Zipkin can be started locally with
 
 ```bash
 docker run --rm -it --name zipkin \
   -p 9411:9411 -d \
   openzipkin/zipkin:latest
 ```
+
 Then open the [Zipkin UI](http://localhost:9411/zipkin/).
 
-
-### With Jaeger 
+### With Jaeger
 
 Use `JaegerOpenTelemetryProvider`
 
@@ -54,14 +55,15 @@ docker run --rm -it --name jaeger\
   jaegertracing/all-in-one:1.16
 ```
 
-Then open the [Jaeger UI](http://localhost:16686/search) 
+Then open the [Jaeger UI](http://localhost:16686/search)
 
 Some useful links for Jaeger
+
 * https://opentelemetry.io/docs/instrumentation/js/exporters/
 * https://www.jaegertracing.io/docs/1.33/getting-started/
 * https://github.com/open-telemetry/opentelemetry-java-docs/tree/main/jaeger
 
-### InMemory only 
+### InMemory only
 
 This is enough to capture output and assert the results in testcase.
 
