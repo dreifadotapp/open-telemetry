@@ -66,6 +66,10 @@ dependencies {
 
     // for zipkin example
     implementation("io.opentelemetry:opentelemetry-exporter-zipkin:$opentelemetryVersion")
+
+    // for jeager
+    implementation("io.opentelemetry:opentelemetry-exporter-jaeger:$opentelemetryVersion")
+
     //alpha module
     implementation "io.opentelemetry:opentelemetry-semconv:$opentelemetryVersion-alpha"
 

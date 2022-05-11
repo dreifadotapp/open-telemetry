@@ -20,6 +20,17 @@ docker run --rm -it --name zipkin \
 
 Then open the [Zipkin UI](http://localhost:9411/zipkin/).
 
+## Using Jaeger 
+
+_todo: clean up notes_
+
+https://opentelemetry.io/docs/instrumentation/js/exporters/
+https://www.jaegertracing.io/docs/1.33/getting-started/
+
+https://github.com/open-telemetry/opentelemetry-java-docs/tree/main/jaeger
+
+ui is at - http://localhost:16686/search
+
 ## Dependencies
 
 As with everything in [Dreifa dot App](https://dreifa.app), this library has minimal dependencies:

@@ -13,11 +13,11 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OpenTelemetryTests {
-    private lateinit var provider: ZipKinOpenTelemetryProvider
+    private lateinit var provider: OpenTelemetryProvider
 
     @BeforeEach
     fun `fresh provider`() {
-        provider = ZipKinOpenTelemetryProvider()
+        provider = ZipKinOpenTelemetryProvider(true)
     }
 
     @AfterAll
