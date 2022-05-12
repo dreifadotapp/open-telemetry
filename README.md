@@ -9,16 +9,17 @@ Some helpers and support classes for [Open Telemetry](https://opentelemetry.io/)
 
 ## Running Tests
 
-Most unit tests are setup to automatically send metric to a locally running Zipkin
-collector, if running - this makes it easier to analyse the output. To start Zipkin, run
+Most unit tests are setup to automatically send metrics to a Jaeger
+collector, if running - this makes it easier to analyse the output. To start Jaeger locally, run
 
 ```bash
-docker run --rm -it --name zipkin \
-  -p 9411:9411 -d \
-  openzipkin/zipkin:latest
+docker run --rm -it --name jaeger\
+  -p 16686:16686 \
+  -p 14250:14250 -d \
+  jaegertracing/all-in-one:latest
 ```
 
-Then open the [Zipkin UI](http://localhost:9411/zipkin/).
+Then open the [Jaeger UI](http://localhost:16686/search)
 
 ## The 'OpenTelemetryProvider' interface
 

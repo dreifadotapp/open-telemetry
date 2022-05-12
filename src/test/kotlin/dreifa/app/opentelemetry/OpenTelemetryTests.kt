@@ -17,13 +17,13 @@ class OpenTelemetryTests {
 
     @BeforeEach
     fun `fresh provider`() {
-        provider = ZipkinOpenTelemetryProvider(true)
+        provider = JaegerOpenTelemetryProvider(true)
     }
 
     @AfterAll
-    fun `wait for zipkin`() {
-        // give it time to flush to zipkin
-        Thread.sleep(50)
+    fun `wait to flush telemetry`() {
+        // give it time to flush to the collector
+        Thread.sleep(100)
     }
 
 
