@@ -13,7 +13,7 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 
 class ZipkinOpenTelemetryProvider(
     memoryCacheEnabled: Boolean = false,
-    serviceName: String = "dreifa-libs"
+    serviceName: String = "app.dreifa"
 ) : OpenTelemetryProvider {
     private val endpoint = String.format("http://%s:%s/api/v2/spans", "localhost", 9411)
     private val zipkinExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build()

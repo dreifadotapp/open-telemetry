@@ -93,3 +93,8 @@ implementation "com.github.dreifadotapp:open-telemetry:<release>"
 ```
 
 _JitPack build status is at https://jitpack.io/com/github/dreifadotapp/open-telemetry/$releaseTag/build.log_
+
+## Useful links
+
+* [Manual configuration for Java](https://opentelemetry.io/docs/instrumentation/java/manual/)
+* [Uber article on Jaeger](https://eng.uber.com/distributed-tracing/)
