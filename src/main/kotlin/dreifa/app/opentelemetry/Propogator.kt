@@ -10,7 +10,6 @@ import io.opentelemetry.context.propagation.TextMapSetter
 import io.opentelemetry.sdk.trace.ReadableSpan
 
 
-
 class NoopTextMapGetter : TextMapGetter<OpenTelemetryContext> {
     override fun keys(carrier: OpenTelemetryContext): Iterable<String> = emptyList()
     override fun get(carrier: OpenTelemetryContext?, key: String): String? = null
@@ -49,19 +48,3 @@ class MyTextMapPropagator : TextMapPropagator {
     }
 }
 
-
-class ContextHelper(private val p: OpenTelemetryProvider) {
-    private fun createContext(traceId: String, spanId: String): Context {
-        val propagator = p.sdk().propagators.textMapPropagator
-        val c = OpenTelemetryContext(traceId = traceId, spanId = spanId)
-        return propagator.extract(Context.current(), c, NoopTextMapGetter())
-    }
-
-    fun createContext(parent: OpenTelemetryContext): Context {
-        return createContext(parent.traceId, parent.spanId)
-    }
-
-    fun createContext(parent: OpenTelemetryContextDTO): Context {
-        return createContext(parent.context())
-    }
-}
