@@ -53,6 +53,7 @@ dependencies {
 
     implementation("com.github.jitpack:gradle-simple:1.0")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
 
     implementation "com.github.dreifadotapp:registry:$registryVersion"
     implementation "com.github.dreifadotapp:commons:$commonsVersion"

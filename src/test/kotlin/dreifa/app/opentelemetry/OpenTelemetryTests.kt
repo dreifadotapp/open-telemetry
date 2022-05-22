@@ -75,9 +75,8 @@ class OpenTelemetryTests {
         assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(1))
         assert(spansAnalyser.filterHasAttributeValue("client.attr", "missing value", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
         assert(spansAnalyser.filterHasAttributeValue("missing.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
-
-
     }
+
 
     private fun buildTracer(scope: String): Tracer {
         return provider.sdk().getTracer(scope)
