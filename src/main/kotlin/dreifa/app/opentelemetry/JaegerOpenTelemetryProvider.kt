@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class JaegerOpenTelemetryProvider(
     memoryCacheEnabled: Boolean = false,
-    serviceName: String = "dreifa-libs"
+    serviceName: String = "dreifa.app.opentelemetry-lib"
 ) : OpenTelemetryProvider {
     private val endpoint = "http://localhost:14250"
     private val jaegerExporter: JaegerGrpcSpanExporter = JaegerGrpcSpanExporter.builder()

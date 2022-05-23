@@ -26,7 +26,6 @@ class OpenTelemetryTests {
         Thread.sleep(100)
     }
 
-
     @Test
     fun `should trace client to server`() {
         val clientTracer = buildTracer("client")
@@ -62,19 +61,19 @@ class OpenTelemetryTests {
         assertThat(spansAnalyser[2].name, equalTo("DummyServer2"))
 
         // check filtering by attr
-        assertThat(spansAnalyser.filterHasAttribute("server.attr").size, equalTo(3))
-        assertThat(spansAnalyser.filterHasAttribute("server.attr", SimpleSpansAnalyser.MatchingRule.AnySpanInTraceId).size, equalTo(3))
-        assertThat(spansAnalyser.filterHasAttribute("server.attr", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(2))
-        assert(spansAnalyser.filterHasAttribute("missing.attr").isEmpty())
+        assertThat(spansAnalyser.withAttribute("server.attr").size, equalTo(3))
+        assertThat(spansAnalyser.withAttribute("server.attr", SimpleSpansAnalyser.MatchingRule.AnySpanInTraceId).size, equalTo(3))
+        assertThat(spansAnalyser.withAttribute("server.attr", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(2))
+        assert(spansAnalyser.withAttribute("missing.attr").isEmpty())
 
         // check filtering by attr / value
-        assertThat(spansAnalyser.filterHasAttributeValue("server.attr", "server1").size, equalTo(3))
-        assertThat(spansAnalyser.filterHasAttributeValue("server.attr", "server2").size, equalTo(3))
-        assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client").size, equalTo(3))
-        assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.AnySpanInTraceId).size, equalTo(3))
-        assertThat(spansAnalyser.filterHasAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(1))
-        assert(spansAnalyser.filterHasAttributeValue("client.attr", "missing value", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
-        assert(spansAnalyser.filterHasAttributeValue("missing.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
+        assertThat(spansAnalyser.withAttributeValue("server.attr", "server1").size, equalTo(3))
+        assertThat(spansAnalyser.withAttributeValue("server.attr", "server2").size, equalTo(3))
+        assertThat(spansAnalyser.withAttributeValue("client.attr", "client").size, equalTo(3))
+        assertThat(spansAnalyser.withAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.AnySpanInTraceId).size, equalTo(3))
+        assertThat(spansAnalyser.withAttributeValue("client.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).size, equalTo(1))
+        assert(spansAnalyser.withAttributeValue("client.attr", "missing value", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
+        assert(spansAnalyser.withAttributeValue("missing.attr", "client", SimpleSpansAnalyser.MatchingRule.SingleSpan).isEmpty())
     }
 
 

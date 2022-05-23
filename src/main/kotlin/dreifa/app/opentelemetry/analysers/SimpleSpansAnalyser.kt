@@ -3,7 +3,9 @@ package dreifa.app.opentelemetry.analysers
 import dreifa.app.types.CorrelationContext
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.SpanId
+import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.sdk.trace.data.SpanData
+import io.opentelemetry.sdk.trace.data.StatusData
 
 class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
 
@@ -20,7 +22,7 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
         return SimpleSpansAnalyser(spans.filter { it.traceId == traceId })
     }
 
-    fun filterHasAttribute(key: String, rule: MatchingRule = MatchingRule.AnySpanInTraceId): SimpleSpansAnalyser {
+    fun withAttribute(key: String, rule: MatchingRule = MatchingRule.AnySpanInTraceId): SimpleSpansAnalyser {
         return when (rule) {
             MatchingRule.SingleSpan -> {
                 SimpleSpansAnalyser(spans.filter { SimpleSpanAnalyser(it).hasAttribute(key) })
@@ -29,7 +31,7 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
                 val filtered = ArrayList<SpanData>()
                 traceIds().forEach { traceId ->
                     val spansForTraceId = filterTraceId(traceId)
-                    if (spansForTraceId.filterHasAttribute(key, MatchingRule.SingleSpan).isNotEmpty()) {
+                    if (spansForTraceId.withAttribute(key, MatchingRule.SingleSpan).isNotEmpty()) {
                         filtered.addAll(spansForTraceId.spans)
                     }
                 }
@@ -38,14 +40,26 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
         }
     }
 
+    @Deprecated(message = "use withAttribute")
+    fun filterHasAttribute(key: String, rule: MatchingRule = MatchingRule.AnySpanInTraceId) = withAttribute(key, rule)
+
+
+    @Deprecated(message = "use withAttribute")
     fun filterHasAttribute(
         key: AttributeKey<Any>,
         rule: MatchingRule = MatchingRule.AnySpanInTraceId
     ): SimpleSpansAnalyser {
-        return filterHasAttribute(key.key, rule)
+        return withAttribute(key.key, rule)
     }
 
-    fun filterHasAttributeValue(
+    fun withAttribute(
+        key: AttributeKey<Any>,
+        rule: MatchingRule = MatchingRule.AnySpanInTraceId
+    ): SimpleSpansAnalyser {
+        return withAttribute(key.key, rule)
+    }
+
+    fun withAttributeValue(
         key: String,
         value: Any,
         rule: MatchingRule = MatchingRule.AnySpanInTraceId
@@ -58,7 +72,7 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
                 val filtered = ArrayList<SpanData>()
                 traceIds().forEach { traceId ->
                     val spansForTraceId = filterTraceId(traceId)
-                    if (spansForTraceId.filterHasAttributeValue(key, value, MatchingRule.SingleSpan).isNotEmpty()) {
+                    if (spansForTraceId.withAttributeValue(key, value, MatchingRule.SingleSpan).isNotEmpty()) {
                         filtered.addAll(spansForTraceId.spans)
                     }
                 }
@@ -67,12 +81,26 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
         }
     }
 
-    fun filterHasAttributeValue(key: AttributeKey<Any>, value: Any): SimpleSpansAnalyser {
-        return filterHasAttributeValue(key.key, value)
+    @Deprecated(message = "use withAttributeValue")
+    fun filterHasAttributeValue(
+        key: String,
+        value: Any,
+        rule: MatchingRule = MatchingRule.AnySpanInTraceId
+    ) = withAttributeValue(key, value, rule)
+
+
+    @Deprecated(message = "use withAttributeValue")
+    fun filterHasAttributeValue(key: AttributeKey<Any>, value: Any) = withAttributeValue(key, value)
+
+    fun withAttributeValue(key: AttributeKey<Any>, value: Any): SimpleSpansAnalyser {
+        return withAttributeValue(key.key, value)
     }
 
-    fun filterHasAttributeValue(correlation: CorrelationContext): SimpleSpansAnalyser {
-        return filterHasAttributeValue(correlation.openTelemetryAttrName, correlation.id.id)
+    @Deprecated(message = "use withCorrelation")
+    fun filterHasAttributeValue(correlation: CorrelationContext) = withCorrelation(correlation)
+
+    fun withCorrelation(correlation: CorrelationContext): SimpleSpansAnalyser {
+        return withAttributeValue(correlation.openTelemetryAttrName, correlation.id.id)
     }
 
 
@@ -80,7 +108,27 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
 
     fun spanIds(): Set<String> = spans.map { it.spanId }.toSet()
 
+    fun spanNames(): Set<String> = spans.map { it.name }.toSet()
+
+    fun spanKinds(): Set<SpanKind> = spans.map { it.kind }.toSet()
+
+
     fun rootSpan(): SpanData = spans.single { it.parentSpanContext.spanId == SpanId.getInvalid() }
+
+    fun withName(name: String): SimpleSpansAnalyser {
+        val filtered = spans.filter { it.name == name }
+        return SimpleSpansAnalyser(filtered)
+    }
+
+    fun withKind(kind: SpanKind): SimpleSpansAnalyser {
+        val filtered = spans.filter { it.kind == kind }
+        return SimpleSpansAnalyser(filtered)
+    }
+
+    fun withStatue(status: StatusData): SimpleSpansAnalyser {
+        val filtered = spans.filter { it.status == status }
+        return SimpleSpansAnalyser(filtered)
+    }
 
     fun children(parent: SpanData): SimpleSpansAnalyser {
         val filtered = spans.filter {
@@ -115,6 +163,8 @@ class SimpleSpansAnalyser(spans: List<SpanData>) : Iterable<SpanData> {
     fun secondSpan(): SpanData = spans[1]
 
     fun lastSpan(): SpanData = spans.last()
+
+    fun spans(): List<SpanData> = spans
 
     val size: Int = spans.size
 

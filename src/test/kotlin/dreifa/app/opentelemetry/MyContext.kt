@@ -1,2 +1,0 @@
-package dreifa.app.opentelemetry
-
