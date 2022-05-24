@@ -8,11 +8,10 @@ import io.opentelemetry.api.trace.TraceId
 // the information passed between layers and into telemetry handlers
 
 data class OpenTelemetryContext(
-    val traceId: String,
-    val spanId: String,
+    val traceId: String, val spanId: String,
 
     /**
-     * Optional - really to generate sensible spanKind when the component topology
+     * Optional - this is really to generate sensible spanKind when the component topology
      *            changes depending on the type of deployment, e.g, for an "all in one"
      *            style service  "INTERNAL" is logical, but in a production mode
      *            "ClIENT" and "SERVER" may make more sense.
@@ -28,18 +27,32 @@ data class OpenTelemetryContext(
 
     companion object {
         private val rootOpenTelemetryContext = OpenTelemetryContext(TraceId.getInvalid(), Span.getInvalid().toString())
+
+        private val noOpenTelemetryContext =
+            OpenTelemetryContext("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "zzzzzzzzzzzzzzzz")
+
         fun root() = rootOpenTelemetryContext
-        fun fromSpan(span: Span): OpenTelemetryContext = OpenTelemetryContext(span)
-        fun fromSpan(span: Span, kind: SpanKind): OpenTelemetryContext = OpenTelemetryContext(span, kind)
-        fun fromSpanContext(spanContext: SpanContext): OpenTelemetryContext = OpenTelemetryContext(spanContext)
-        fun fromSpanContext(spanContext: SpanContext, kind: SpanKind): OpenTelemetryContext =
-            OpenTelemetryContext(spanContext, kind)
+        fun none() = noOpenTelemetryContext
+
+        fun fromSpan(span: Span?, default: OpenTelemetryContext) =
+            if (span != null) OpenTelemetryContext(span) else default
+
+        fun fromSpan(span: Span) = OpenTelemetryContext(span)
+
+        fun fromSpan(span: Span, kind: SpanKind) = OpenTelemetryContext(span, kind)
+
+        fun fromSpanContext(spanContext: SpanContext) = OpenTelemetryContext(spanContext)
+
+        fun fromSpanContext(spanContext: SpanContext, kind: SpanKind) = OpenTelemetryContext(spanContext, kind)
+
 
     }
 
     fun isRoot() = this == root()
 
-    fun isNested() = !isRoot()
+    fun isNone() = this == none()
+
+    fun isNested() = !isRoot() && !isNone()
 
     fun dto(): OpenTelemetryContextDTO = OpenTelemetryContextDTO(this)
 }
@@ -50,5 +63,5 @@ data class OpenTelemetryContext(
 data class OpenTelemetryContextDTO(val traceId: String, val spanId: String, val kind: String? = null) {
     constructor(context: OpenTelemetryContext) : this(context.traceId, context.spanId, context.spanKind?.name)
 
-    fun context(): OpenTelemetryContext = OpenTelemetryContext(traceId, spanId, kind?.let {  SpanKind.valueOf(it) })
+    fun context(): OpenTelemetryContext = OpenTelemetryContext(traceId, spanId, kind?.let { SpanKind.valueOf(it) })
 }
