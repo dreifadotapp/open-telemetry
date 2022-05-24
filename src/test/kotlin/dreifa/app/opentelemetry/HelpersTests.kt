@@ -22,7 +22,6 @@ class HelpersTests {
         tracer = provider.sdk().getTracer("dreifa.app.opentelemetry.HelpersTests")
     }
 
-
     @AfterAll
     fun `wait to flush telemetry`() {
         // give it time to flush to the collector
@@ -111,10 +110,8 @@ class HelpersTests {
         val random = Random(System.currentTimeMillis())
 
         // simulate a client to create a new trace
-        val outer = tracer.spanBuilder("clientspan")
-            .setSpanKind(SpanKind.CLIENT)
-            .setAttribute("testid", testId)
-            .startSpan()
+        val outer =
+            tracer.spanBuilder("clientspan").setSpanKind(SpanKind.CLIENT).setAttribute("testid", testId).startSpan()
 
         // simulate a server that has propagated the context from the client
         Helpers.runWithTelemetry(provider = provider,
@@ -137,8 +134,7 @@ class HelpersTests {
                     block = { Thread.sleep(random.nextLong(10)) })
 
                 Thread.sleep(random.nextLong(10))
-            }
-        )
+            })
         outer.end()
 
         val analyser = provider.spans().analyser().withAttributeValue("testid", testId)
@@ -157,19 +153,18 @@ class HelpersTests {
         assertThat(testSpans.spanKinds(), equalTo(setOf(SpanKind.INTERNAL)))
     }
 
-
     @Test
     fun `should pass span to block`() {
         val testId = "should-pass-span-to-block`"
 
-        var capturedSpan : Span? = null
+        var capturedSpan: Span? = null
         Helpers.runWithTelemetry(provider = provider,
             tracer = tracer,
             telemetryContext = OpenTelemetryContext.root(),
             spanDetails = SpanDetails(
                 "testspan", SpanKind.INTERNAL, Attributes.of(AttributeKey.stringKey("testid"), testId)
             ),
-            block = { span -> capturedSpan = span})
+            block = { span -> capturedSpan = span })
 
         val analyser = provider.spans().analyser().withAttributeValue("testid", testId)
 
@@ -177,10 +172,7 @@ class HelpersTests {
         assertThat(analyser.spanIds().size, equalTo(1))
         val span = analyser.firstSpan()
         capturedSpan!!.spanContext.spanId
-        assertThat(capturedSpan!!.spanContext.spanId, equalTo( span.spanContext.spanId))
-
+        assertThat(capturedSpan!!.spanContext.spanId, equalTo(span.spanContext.spanId))
 
     }
-
-
 }
