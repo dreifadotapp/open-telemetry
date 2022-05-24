@@ -4,6 +4,7 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.api.trace.Tracer
 import io.opentelemetry.sdk.trace.data.StatusData
@@ -155,5 +156,31 @@ class HelpersTests {
         assertThat(testSpans.size, equalTo(2))
         assertThat(testSpans.spanKinds(), equalTo(setOf(SpanKind.INTERNAL)))
     }
+
+
+    @Test
+    fun `should pass span to block`() {
+        val testId = "should-pass-span-to-block`"
+
+        var capturedSpan : Span? = null
+        Helpers.runWithTelemetry(provider = provider,
+            tracer = tracer,
+            telemetryContext = OpenTelemetryContext.root(),
+            spanDetails = SpanDetails(
+                "testspan", SpanKind.INTERNAL, Attributes.of(AttributeKey.stringKey("testid"), testId)
+            ),
+            block = { span -> capturedSpan = span})
+
+        val analyser = provider.spans().analyser().withAttributeValue("testid", testId)
+
+        assertThat(analyser.traceIds().size, equalTo(1))
+        assertThat(analyser.spanIds().size, equalTo(1))
+        val span = analyser.firstSpan()
+        capturedSpan!!.spanContext.spanId
+        assertThat(capturedSpan!!.spanContext.spanId, equalTo( span.spanContext.spanId))
+
+
+    }
+
 
 }

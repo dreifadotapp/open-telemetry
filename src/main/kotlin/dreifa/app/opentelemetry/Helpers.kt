@@ -4,6 +4,7 @@ import dreifa.app.registry.Registry
 import dreifa.app.types.CorrelationContext
 import dreifa.app.types.CorrelationContexts
 import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanKind
 import io.opentelemetry.api.trace.StatusCode
 import io.opentelemetry.api.trace.Tracer
@@ -14,26 +15,19 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 data class SpanDetails(
-    val name: String,
-    val kind: SpanKind,
-    val attributes: Attributes = Attributes.empty()
+    val name: String, val kind: SpanKind, val attributes: Attributes = Attributes.empty()
 ) {
 
     constructor(
-        name: String,
-        kind: SpanKind
+        name: String, kind: SpanKind
     ) : this(name, kind, Attributes.empty())
 
     constructor(
-        name: String,
-        kind: SpanKind,
-        correlations: CorrelationContexts = CorrelationContexts.empty()
+        name: String, kind: SpanKind, correlations: CorrelationContexts = CorrelationContexts.empty()
     ) : this(name, kind, AttributesHelper.fromCorrelations(correlations))
 
     constructor(
-        name: String,
-        kind: SpanKind,
-        correlation: CorrelationContext
+        name: String, kind: SpanKind, correlation: CorrelationContext
     ) : this(name, kind, AttributesHelper.fromCorrelation(correlation))
 }
 
@@ -48,7 +42,7 @@ object Helpers {
         telemetryContext: OpenTelemetryContext,
         spanDetails: SpanDetails,
         exceptionStrategy: ExceptionStrategy = ExceptionStrategy.recordAndThrow,
-        block: () -> T
+        block: (span: Span?) -> T
     ): T {
         return if (tracer != null && provider != null) {
             runBlocking(coroutineContext) {
@@ -57,7 +51,7 @@ object Helpers {
                     val span = tracer.spanBuilder(spanDetails.name).setSpanKind(spanDetails.kind)
                         .setAllAttributes(spanDetails.attributes).startSpan()
                     try {
-                        val result = block.invoke()
+                        val result = block.invoke(span)
                         span.setStatus(StatusCode.OK).end()
                         result
                     } catch (ex: Exception) {
@@ -70,7 +64,7 @@ object Helpers {
                 }
             }
         } else {
-            block.invoke()
+            block.invoke(null)
         }
     }
 
@@ -80,7 +74,7 @@ object Helpers {
         provider: OpenTelemetryProvider? = null,
         spanDetails: SpanDetails,
         exceptionStrategy: ExceptionStrategy = ExceptionStrategy.recordAndThrow,
-        block: () -> T
+        block: (span : Span?) -> T
     ): T {
         return if (tracer != null && provider != null) {
             runBlocking(coroutineContext) {
@@ -88,7 +82,7 @@ object Helpers {
                     val span = tracer.spanBuilder(spanDetails.name).setSpanKind(spanDetails.kind)
                         .setAllAttributes(spanDetails.attributes).startSpan()
                     try {
-                        val result = block.invoke()
+                        val result = block.invoke(span)
                         span.setStatus(StatusCode.OK).end()
                         result
                     } catch (ex: Exception) {
@@ -101,7 +95,7 @@ object Helpers {
                 }
             }
         } else {
-            block.invoke()
+            block.invoke(null)
         }
     }
 
@@ -111,7 +105,7 @@ object Helpers {
         telemetryContext: OpenTelemetryContext,
         spanDetails: SpanDetails,
         exceptionStrategy: ExceptionStrategy = ExceptionStrategy.recordAndThrow,
-        block: () -> T
+        block: (span : Span?) -> T
     ): T {
         return runWithTelemetry(
             coroutineContext,
