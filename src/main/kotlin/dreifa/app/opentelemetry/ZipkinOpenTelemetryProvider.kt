@@ -13,9 +13,9 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
 
 class ZipkinOpenTelemetryProvider(
     memoryCacheEnabled: Boolean = false,
-    serviceName: String = "app.dreifa"
+    serviceName: String = "app.dreifa",
+    endpoint: String = "http://localhost:9411/api/v2/spans"
 ) : OpenTelemetryProvider {
-    private val endpoint = String.format("http://%s:%s/api/v2/spans", "localhost", 9411)
     private val zipkinExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build()
 
     private val inMemory: InMemorySpanExporter = if (memoryCacheEnabled) {
