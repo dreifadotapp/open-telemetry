@@ -59,7 +59,9 @@ dependencies {
     implementation "com.github.dreifadotapp:commons:$commonsVersion"
 
     compile "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
+    compile "io.opentelemetry:opentelemetry-exporter-otlp-common:$opentelemetryVersion"
     compile "io.opentelemetry:opentelemetry-exporter-logging:$opentelemetryVersion"
+
     compile "io.opentelemetry:opentelemetry-extension-kotlin:$opentelemetryVersion"
 
     implementation "io.grpc:grpc-context:$opentelemetryVersion"
@@ -77,7 +79,7 @@ dependencies {
     testImplementation("com.natpryce:hamkrest:$hamkrestVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation('org.junit.platform:junit-platform-runner:1.0.0')
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    //testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
 }
 
 test {

@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit
 
 class JaegerOpenTelemetryProvider(
     memoryCacheEnabled: Boolean = false,
-    serviceName: String = "dreifa.app.opentelemetry-lib"
+    serviceName: String = "dreifa.app.opentelemetry-lib",
+    endpoint: String = "http://localhost:14250"
 ) : OpenTelemetryProvider {
-    private val endpoint = "http://localhost:14250"
     private val jaegerExporter: JaegerGrpcSpanExporter = JaegerGrpcSpanExporter.builder()
         .setEndpoint(endpoint)
         .setTimeout(30, TimeUnit.SECONDS)
